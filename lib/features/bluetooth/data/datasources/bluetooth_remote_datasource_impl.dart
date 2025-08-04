@@ -45,6 +45,7 @@ class BluetoothRemoteDataSourceImpl implements BluetoothRemoteDataSource {
       
       // Return the scan results stream
       return FlutterBluePlus.scanResults.map((results) {
+        print('DEBUG: Found ${results.length} devices in scan results');
         return results.map((result) {
           return BluetoothDeviceModel(
             id: result.device.remoteId.toString(),
@@ -56,9 +57,11 @@ class BluetoothRemoteDataSourceImpl implements BluetoothRemoteDataSource {
             advertisementData: {
               'txPowerLevel': result.advertisementData.txPowerLevel,
               'connectable': result.advertisementData.connectable,
-              'manufacturerData': result.advertisementData.manufacturerData,
-              'serviceData': result.advertisementData.serviceData,
-              'serviceUuids': result.advertisementData.serviceUuids,
+              'manufacturerData': result.advertisementData.manufacturerData.map((key, value) => 
+                MapEntry(key.toString(), value is List ? value.map((e) => e.toString()).toList() : value.toString())),
+              'serviceData': result.advertisementData.serviceData.map((key, value) => 
+                MapEntry(key.toString(), value is List ? value.map((e) => e.toString()).toList() : value.toString())),
+              'serviceUuids': result.advertisementData.serviceUuids.map((uuid) => uuid.toString()).toList(),
             },
           );
         }).toList();

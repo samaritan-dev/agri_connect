@@ -36,11 +36,7 @@ class BluetoothPage extends StatelessWidget {
                     ScanControls(isScanning: state.isScanning),
                     SizedBox(height: 16),
                     Expanded(
-                      child: DeviceList(
-                        devices: state.devices,
-                        isScanning: state.isScanning,
-                        connectedDevices: state.connectedDevices,
-                      ),
+                      child: DeviceList(),
                     ),
                   ],
                 ),

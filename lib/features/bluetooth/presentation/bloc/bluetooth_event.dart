@@ -31,4 +31,22 @@ class DisconnectFromDevice extends BluetoothEvent {
   List<Object> get props => [deviceId];
 }
 
-class GetConnectedDevices extends BluetoothEvent {} 
+class GetConnectedDevices extends BluetoothEvent {}
+
+class UpdateDevices extends BluetoothEvent {
+  final List<dynamic> devices;
+
+  const UpdateDevices({required this.devices});
+
+  @override
+  List<Object> get props => [devices];
+}
+
+class ScanFailed extends BluetoothEvent {
+  final String message;
+
+  const ScanFailed({required this.message});
+
+  @override
+  List<Object> get props => [message];
+} 

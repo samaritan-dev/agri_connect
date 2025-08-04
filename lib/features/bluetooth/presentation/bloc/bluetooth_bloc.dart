@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:agri_connect/core/error/failures.dart';
 import 'package:agri_connect/core/usecases/either.dart';
@@ -31,6 +32,8 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     on<ConnectToDevice>(_onConnectToDevice);
     on<DisconnectFromDevice>(_onDisconnectFromDevice);
     on<GetConnectedDevices>(_onGetConnectedDevices);
+    on<UpdateDevices>(_onUpdateDevices);
+    on<ScanFailed>(_onScanFailed);
   }
 
   Future<void> _onInitializeBluetooth(
@@ -40,6 +43,24 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     emit(BluetoothLoading());
     
     try {
+      // Check and request permissions first
+      final locationStatus = await Permission.location.status;
+      final bluetoothStatus = await Permission.bluetooth.status;
+      final bluetoothScanStatus = await Permission.bluetoothScan.status;
+      
+      // Request permissions if needed
+      if (locationStatus.isDenied) {
+        await Permission.location.request();
+      }
+      
+      if (bluetoothStatus.isDenied) {
+        await Permission.bluetooth.request();
+      }
+      
+      if (bluetoothScanStatus.isDenied) {
+        await Permission.bluetoothScan.request();
+      }
+      
       // Check if Bluetooth is supported
       final isSupportedResult = await scanDevices.repository.isBluetoothSupported();
       final isSupported = isSupportedResult.fold(
@@ -85,31 +106,43 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
         
         emit(currentState.copyWith(isScanning: true, devices: []));
         
+        // Ensure Bluetooth is on before scanning
+        final adapterState = await fbp.FlutterBluePlus.adapterState.first;
+        if (adapterState != fbp.BluetoothAdapterState.on) {
+          await fbp.FlutterBluePlus.turnOn();
+          await Future.delayed(Duration(seconds: 2));
+        }
+        
         // Start scanning
+        print('DEBUG BLoC: Starting scan...');
         final scanStream = await scanDevices(NoParams());
+        print('DEBUG BLoC: Scan stream created');
         
         _scanSubscription?.cancel();
         _scanSubscription = scanStream.listen(
           (either) {
-            if (!emit.isDone) {
-              either.fold(
-                (failure) {
-                  if (state is BluetoothLoaded) {
-                    final currentState = state as BluetoothLoaded;
-                    emit(currentState.copyWith(
-                      isScanning: false,
-                      bluetoothStatus: 'Scan failed: ${failure.message}',
-                    ));
-                  }
-                },
-                (devices) {
-                  if (state is BluetoothLoaded) {
-                    final currentState = state as BluetoothLoaded;
-                    emit(currentState.copyWith(devices: devices));
-                  }
-                },
-              );
+            print('DEBUG BLoC: Received scan result');
+            print('DEBUG BLoC: Either type: ${either.runtimeType}');
+            print('DEBUG BLoC: Is Right: ${either is Right}');
+            print('DEBUG BLoC: Is Left: ${either is Left}');
+            
+            // Try manual extraction instead of fold
+            if (either is Right) {
+              final devices = either.getRight();
+              print('DEBUG BLoC: MANUAL - Found ${devices.length} devices');
+              
+              // Use add() to dispatch a new event instead of direct emit
+              add(UpdateDevices(devices: devices));
+              print('DEBUG BLoC: UpdateDevices event dispatched');
+            } else if (either is Left) {
+              final failure = either.getLeft();
+              print('DEBUG BLoC: MANUAL - Scan failed: ${failure.message}');
+              add(ScanFailed(message: failure.message));
+            } else {
+              print('DEBUG BLoC: Unknown Either type: ${either.runtimeType}');
             }
+            
+            print('DEBUG BLoC: Processing completed');
           },
           onError: (error) {
             if (!emit.isDone && state is BluetoothLoaded) {
@@ -208,6 +241,35 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       final currentState = state as BluetoothLoaded;
       // In a real implementation, you would fetch connected devices here
       emit(currentState.copyWith(connectedDevices: []));
+    }
+  }
+
+  Future<void> _onUpdateDevices(
+    UpdateDevices event,
+    Emitter<BluetoothState> emit,
+  ) async {
+    print('DEBUG BLoC: _onUpdateDevices called with ${event.devices.length} devices');
+    if (state is BluetoothLoaded) {
+      final currentState = state as BluetoothLoaded;
+      final devices = event.devices.cast<BluetoothDevice>();
+      emit(currentState.copyWith(devices: devices));
+      print('DEBUG BLoC: State updated with ${devices.length} devices');
+    } else {
+      print('DEBUG BLoC: Current state is not BluetoothLoaded: ${state.runtimeType}');
+    }
+  }
+
+  Future<void> _onScanFailed(
+    ScanFailed event,
+    Emitter<BluetoothState> emit,
+  ) async {
+    print('DEBUG BLoC: _onScanFailed called with message: ${event.message}');
+    if (state is BluetoothLoaded) {
+      final currentState = state as BluetoothLoaded;
+      emit(currentState.copyWith(
+        isScanning: false,
+        bluetoothStatus: 'Scan failed: ${event.message}',
+      ));
     }
   }
 
