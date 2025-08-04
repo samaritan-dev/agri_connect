@@ -19,9 +19,7 @@ class DeviceList extends StatelessWidget {
         final isScanning = state.isScanning;
         final connectedDevices = state.connectedDevices;
 
-        print('DEBUG DeviceList: Building with ${devices.length} devices');
-        print('DEBUG DeviceList: isScanning = $isScanning');
-        print('DEBUG DeviceList: devices.isEmpty = ${devices.isEmpty}');
+
         
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +93,6 @@ class DeviceList extends StatelessWidget {
                   : ListView.builder(
                       itemCount: devices.length,
                       itemBuilder: (context, index) {
-                        print('DEBUG DeviceList: Building item at index $index');
                         final device = devices[index];
                         final isConnected = connectedDevices.any((d) => d.id == device.id);
                         

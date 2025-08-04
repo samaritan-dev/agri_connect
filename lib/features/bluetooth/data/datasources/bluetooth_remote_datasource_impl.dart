@@ -44,9 +44,8 @@ class BluetoothRemoteDataSourceImpl implements BluetoothRemoteDataSource {
       FlutterBluePlus.startScan(timeout: Duration(seconds: 10));
       
       // Return the scan results stream
-      return FlutterBluePlus.scanResults.map((results) {
-        print('DEBUG: Found ${results.length} devices in scan results');
-        return results.map((result) {
+              return FlutterBluePlus.scanResults.map((results) {
+          return results.map((result) {
           return BluetoothDeviceModel(
             id: result.device.remoteId.toString(),
             name: result.device.platformName.isNotEmpty 

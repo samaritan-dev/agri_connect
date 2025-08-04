@@ -38,12 +38,9 @@ class BluetoothRepositoryImpl implements BluetoothRepository {
 
   @override
   Stream<Either<Failure, List<BluetoothDevice>>> scanDevices() {
-    print('DEBUG Repository: Starting scan devices stream');
     return remoteDataSource.scanDevices().map<Either<Failure, List<BluetoothDevice>>>((deviceModels) {
-      print('DEBUG Repository: Received ${deviceModels.length} device models');
       // Convert BluetoothDeviceModel to BluetoothDevice
       final devices = deviceModels.map((model) => model as BluetoothDevice).toList();
-      print('DEBUG Repository: Converted to ${devices.length} devices');
       // Cache the devices locally
       localDataSource.cacheDevices(deviceModels);
       return Right(devices);
