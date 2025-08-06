@@ -11,6 +11,7 @@ import 'package:app_agri_connect/features/bluetooth/domain/usecases/scan_devices
 import 'package:app_agri_connect/features/bluetooth/domain/usecases/connect_device.dart';
 import 'package:app_agri_connect/features/bluetooth/domain/usecases/disconnect_device.dart';
 import 'package:app_agri_connect/features/bluetooth/domain/usecases/get_connected_devices.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/usecases/send_command.dart' as send_command_use_case;
 import 'package:app_agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
 import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
 import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_state.dart';
@@ -20,6 +21,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   final ConnectDevice connectDevice;
   final DisconnectDevice disconnectDevice;
   final GetConnectedDevicesUseCase getConnectedDevices;
+  final send_command_use_case.SendCommand sendCommand;
   
   StreamSubscription<Either<Failure, List<BluetoothDevice>>>? _scanSubscription;
 
@@ -28,6 +30,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     required this.connectDevice,
     required this.disconnectDevice,
     required this.getConnectedDevices,
+    required this.sendCommand,
   }) : super(BluetoothInitial()) {
     on<InitializeBluetooth>(_onInitializeBluetooth);
     on<StartScan>(_onStartScan);
@@ -35,6 +38,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     on<ConnectToDevice>(_onConnectToDevice);
     on<DisconnectFromDevice>(_onDisconnectFromDevice);
     on<GetConnectedDevices>(_onGetConnectedDevices);
+    on<SendCommand>(_onSendCommand);
     on<UpdateDevices>(_onUpdateDevices);
     on<ScanFailed>(_onScanFailed);
   }
@@ -275,6 +279,40 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
           bluetoothStatus: 'Error getting connected devices: $e',
         ));
       }
+    }
+  }
+
+  Future<void> _onSendCommand(
+    SendCommand event,
+    Emitter<BluetoothState> emit,
+  ) async {
+    try {
+      final result = await sendCommand(send_command_use_case.SendCommandParams(
+        deviceId: event.deviceId, 
+        command: event.command,
+        parameters: event.parameters,
+      ));
+      
+      result.fold(
+        (failure) {
+          emit(BluetoothError(message: failure.message));
+        },
+        (success) {
+          if (success) {
+            // Command sent successfully
+            if (state is BluetoothLoaded) {
+              final currentState = state as BluetoothLoaded;
+              emit(currentState.copyWith(
+                bluetoothStatus: 'Command sent successfully: ${event.command}',
+              ));
+            }
+          } else {
+            emit(BluetoothError(message: 'Failed to send command to device'));
+          }
+        },
+      );
+    } catch (e) {
+      emit(BluetoothError(message: 'Failed to send command to device: $e'));
     }
   }
 

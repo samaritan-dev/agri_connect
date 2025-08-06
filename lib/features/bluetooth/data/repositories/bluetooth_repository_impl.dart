@@ -103,4 +103,14 @@ class BluetoothRepositoryImpl implements BluetoothRepository {
       return Left(BluetoothFailure('Failed to get local device name: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> sendCommand(String deviceId, String command, Map<String, dynamic>? parameters) async {
+    try {
+      final success = await remoteDataSource.sendCommand(deviceId, command, parameters);
+      return Right(success);
+    } catch (e) {
+      return Left(BluetoothFailure('Failed to send command to device: $e'));
+    }
+  }
 } 

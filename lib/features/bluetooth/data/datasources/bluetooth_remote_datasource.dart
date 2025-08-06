@@ -8,4 +8,5 @@ abstract class BluetoothRemoteDataSource {
   Future<bool> disconnectFromDevice(String deviceId);
   Future<List<BluetoothDeviceModel>> getConnectedDevices();
   Future<String> getLocalDeviceName();
+  Future<bool> sendCommand(String deviceId, String command, Map<String, dynamic>? parameters);
 } 

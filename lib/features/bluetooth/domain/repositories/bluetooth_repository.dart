@@ -10,4 +10,5 @@ abstract class BluetoothRepository {
   Future<Either<Failure, bool>> disconnectFromDevice(String deviceId);
   Future<Either<Failure, List<BluetoothDevice>>> getConnectedDevices();
   Future<Either<Failure, String>> getLocalDeviceName();
+  Future<Either<Failure, bool>> sendCommand(String deviceId, String command, Map<String, dynamic>? parameters);
 } 

@@ -33,6 +33,21 @@ class DisconnectFromDevice extends BluetoothEvent {
 
 class GetConnectedDevices extends BluetoothEvent {}
 
+class SendCommand extends BluetoothEvent {
+  final String deviceId;
+  final String command;
+  final Map<String, dynamic>? parameters;
+
+  const SendCommand({
+    required this.deviceId,
+    required this.command,
+    this.parameters,
+  });
+
+  @override
+  List<Object> get props => [deviceId, command, parameters ?? {}];
+}
+
 class UpdateDevices extends BluetoothEvent {
   final List<dynamic> devices;
 

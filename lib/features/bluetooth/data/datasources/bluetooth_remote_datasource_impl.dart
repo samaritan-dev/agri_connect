@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'package:app_agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
@@ -184,6 +185,48 @@ class BluetoothRemoteDataSourceImpl implements BluetoothRemoteDataSource {
       }).toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  @override
+  Future<bool> sendCommand(String deviceId, String command, Map<String, dynamic>? parameters) async {
+    try {
+      final device = BluetoothDevice.fromId(deviceId);
+      
+      // Discover services to find the control characteristic
+      final services = await device.discoverServices();
+      
+      // Look for the farm robot service
+      final farmRobotService = services.firstWhere(
+        (service) => service.uuid.toString().contains('12345678-1234-1234-1234-123456789abc'),
+        orElse: () => throw Exception('Farm robot service not found'),
+      );
+      
+      // Find the control characteristic
+      final controlCharacteristic = farmRobotService.characteristics.firstWhere(
+        (char) => char.uuid.toString().contains('87654321-4321-4321-4321-cba987654321'),
+        orElse: () => throw Exception('Control characteristic not found'),
+      );
+      
+      // Prepare command data
+      final commandData = {
+        'command': command,
+        'parameters': parameters ?? {},
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+      
+      // Convert to JSON and then to bytes
+      final commandJson = json.encode(commandData);
+      final commandBytes = commandJson.codeUnits;
+      
+      // Write the command to the characteristic
+      await controlCharacteristic.write(commandBytes);
+      
+      print('Command sent successfully: $command to device $deviceId');
+      return true;
+    } catch (e) {
+      print('Failed to send command: $e');
+      return false;
     }
   }
 

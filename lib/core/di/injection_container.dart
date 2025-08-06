@@ -12,6 +12,7 @@ import 'package:app_agri_connect/features/bluetooth/domain/usecases/scan_devices
 import 'package:app_agri_connect/features/bluetooth/domain/usecases/connect_device.dart';
 import 'package:app_agri_connect/features/bluetooth/domain/usecases/disconnect_device.dart';
 import 'package:app_agri_connect/features/bluetooth/domain/usecases/get_connected_devices.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/usecases/send_command.dart';
 import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
 import 'package:app_agri_connect/features/home/presentation/bloc/home_bloc.dart';
 
@@ -25,6 +26,7 @@ Future<void> init() async {
       connectDevice: sl(),
       disconnectDevice: sl(),
       getConnectedDevices: sl(),
+      sendCommand: sl(),
     ),
   );
   
@@ -37,6 +39,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ConnectDevice(sl()));
   sl.registerLazySingleton(() => DisconnectDevice(sl()));
   sl.registerLazySingleton(() => GetConnectedDevicesUseCase(sl()));
+  sl.registerLazySingleton(() => SendCommand(sl()));
 
   // Repository
   sl.registerLazySingleton<BluetoothRepository>(
