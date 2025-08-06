@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_agri_connect/core/di/injection_container.dart' as di;
 import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
-import 'package:app_agri_connect/features/bluetooth/presentation/pages/bluetooth_page.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
+import 'package:app_agri_connect/features/home/presentation/pages/home_page.dart';
+import 'package:app_agri_connect/features/settings/presentation/pages/settings_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,10 +27,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('MyApp: Building app with BluetoothBloc initialization...');
+    final bluetoothBloc = di.sl<BluetoothBloc>();
+    print('MyApp: BluetoothBloc created: ${bluetoothBloc.runtimeType}');
+    bluetoothBloc.add(InitializeBluetooth());
+    print('MyApp: InitializeBluetooth event added');
+    
     return MultiBlocProvider(
       providers: [
-        BlocProvider<BluetoothBloc>(
-          create: (context) => di.sl<BluetoothBloc>(),
+        BlocProvider<BluetoothBloc>.value(
+          value: bluetoothBloc,
         ),
       ],
       child: MaterialApp(
@@ -36,7 +44,11 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-                  home: BluetoothPage(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const HomePage(),
+          '/settings': (context) => const SettingsPage(),
+        },
       ),
     );
   }

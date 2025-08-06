@@ -13,18 +13,23 @@ import 'package:app_agri_connect/features/bluetooth/domain/usecases/connect_devi
 import 'package:app_agri_connect/features/bluetooth/domain/usecases/disconnect_device.dart';
 import 'package:app_agri_connect/features/bluetooth/domain/usecases/get_connected_devices.dart';
 import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
+import 'package:app_agri_connect/features/home/presentation/bloc/home_bloc.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // Bloc
-  sl.registerFactory(
+  sl.registerLazySingleton(
     () => BluetoothBloc(
       scanDevices: sl(),
       connectDevice: sl(),
       disconnectDevice: sl(),
       getConnectedDevices: sl(),
     ),
+  );
+  
+  sl.registerFactory(
+    () => HomeBloc(bluetoothBloc: sl()),
   );
 
   // Use cases

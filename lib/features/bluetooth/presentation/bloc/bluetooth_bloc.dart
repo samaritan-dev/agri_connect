@@ -43,6 +43,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     InitializeBluetooth event,
     Emitter<BluetoothState> emit,
   ) async {
+    print('BluetoothBloc: Initializing Bluetooth...');
     emit(BluetoothLoading());
     
     try {
@@ -64,12 +65,14 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
         await Permission.bluetoothScan.request();
       }
       
-      // Check if Bluetooth is supported
-      final isSupportedResult = await scanDevices.repository.isBluetoothSupported();
-      final isSupported = isSupportedResult.fold(
-        (failure) => false,
-        (supported) => supported,
-      );
+      // Check if Bluetooth is supported using FlutterBluePlus directly
+      bool isSupported = false;
+      try {
+        final adapterState = await fbp.FlutterBluePlus.adapterState.first;
+        isSupported = adapterState != fbp.BluetoothAdapterState.unavailable;
+      } catch (e) {
+        isSupported = false;
+      }
 
       if (!isSupported) {
         emit(BluetoothLoaded(
@@ -81,13 +84,34 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
         return;
       }
 
-      // Get current Bluetooth state
-      final stateResult = await scanDevices.repository.getBluetoothState();
-      final bluetoothState = stateResult.fold(
-        (failure) => 'Error getting Bluetooth state',
-        (state) => state,
-      );
+      // Get current Bluetooth state using FlutterBluePlus directly
+      String bluetoothState = 'Unknown';
+      try {
+        final adapterState = await fbp.FlutterBluePlus.adapterState.first;
+        switch (adapterState) {
+          case fbp.BluetoothAdapterState.on:
+            bluetoothState = 'Bluetooth is ON';
+            break;
+          case fbp.BluetoothAdapterState.off:
+            bluetoothState = 'Bluetooth is OFF - Please enable Bluetooth';
+            break;
+          case fbp.BluetoothAdapterState.turningOn:
+            bluetoothState = 'Bluetooth is turning ON';
+            break;
+          case fbp.BluetoothAdapterState.turningOff:
+            bluetoothState = 'Bluetooth is turning OFF';
+            break;
+          case fbp.BluetoothAdapterState.unavailable:
+            bluetoothState = 'Bluetooth is unavailable';
+            break;
+          default:
+            bluetoothState = 'Bluetooth state: $adapterState';
+        }
+      } catch (e) {
+        bluetoothState = 'Error getting Bluetooth state: $e';
+      }
 
+      print('BluetoothBloc: Bluetooth initialized successfully. Status: $bluetoothState');
       emit(BluetoothLoaded(
         bluetoothStatus: bluetoothState,
         devices: [],
@@ -95,6 +119,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
         connectedDevices: [],
       ));
     } catch (e) {
+      print('BluetoothBloc: Error initializing Bluetooth: $e');
       emit(BluetoothError(message: 'Failed to initialize Bluetooth: $e'));
     }
   }
@@ -103,10 +128,12 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     StartScan event,
     Emitter<BluetoothState> emit,
   ) async {
+    print('BluetoothBloc: Starting scan...');
     try {
       if (state is BluetoothLoaded) {
         final currentState = state as BluetoothLoaded;
         
+        print('BluetoothBloc: Current state is BluetoothLoaded, starting scan...');
         emit(currentState.copyWith(isScanning: true, devices: []));
         
         // Ensure Bluetooth is on before scanning
