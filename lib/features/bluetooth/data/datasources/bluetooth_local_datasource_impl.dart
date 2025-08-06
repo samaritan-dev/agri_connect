@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
-import 'package:agri_connect/features/bluetooth/data/datasources/bluetooth_local_datasource.dart';
+import 'package:app_agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
+import 'package:app_agri_connect/features/bluetooth/data/datasources/bluetooth_local_datasource.dart';
 
 class BluetoothLocalDataSourceImpl implements BluetoothLocalDataSource {
   final SharedPreferences sharedPreferences;

@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:agri_connect/core/error/failures.dart';
-import 'package:agri_connect/core/usecases/either.dart';
-import 'package:agri_connect/core/usecases/usecase.dart';
-import 'package:agri_connect/features/bluetooth/domain/repositories/bluetooth_repository.dart';
+import 'package:app_agri_connect/core/error/failures.dart';
+import 'package:app_agri_connect/core/usecases/either.dart';
+import 'package:app_agri_connect/core/usecases/usecase.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/repositories/bluetooth_repository.dart';
 
 class DisconnectDeviceParams extends Equatable {
   final String deviceId;

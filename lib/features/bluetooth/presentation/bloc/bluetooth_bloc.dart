@@ -4,20 +4,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:agri_connect/core/error/failures.dart';
-import 'package:agri_connect/core/usecases/either.dart';
-import 'package:agri_connect/core/usecases/usecase.dart';
-import 'package:agri_connect/features/bluetooth/domain/usecases/scan_devices.dart';
-import 'package:agri_connect/features/bluetooth/domain/usecases/connect_device.dart';
-import 'package:agri_connect/features/bluetooth/domain/usecases/disconnect_device.dart';
-import 'package:agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_state.dart';
+import 'package:app_agri_connect/core/error/failures.dart';
+import 'package:app_agri_connect/core/usecases/either.dart';
+import 'package:app_agri_connect/core/usecases/usecase.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/usecases/scan_devices.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/usecases/connect_device.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/usecases/disconnect_device.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/usecases/get_connected_devices.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_state.dart';
 
 class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   final ScanDevices scanDevices;
   final ConnectDevice connectDevice;
   final DisconnectDevice disconnectDevice;
+  final GetConnectedDevicesUseCase getConnectedDevices;
   
   StreamSubscription<Either<Failure, List<BluetoothDevice>>>? _scanSubscription;
 
@@ -25,6 +27,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     required this.scanDevices,
     required this.connectDevice,
     required this.disconnectDevice,
+    required this.getConnectedDevices,
   }) : super(BluetoothInitial()) {
     on<InitializeBluetooth>(_onInitializeBluetooth);
     on<StartScan>(_onStartScan);
@@ -219,12 +222,32 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     GetConnectedDevices event,
     Emitter<BluetoothState> emit,
   ) async {
-    // This would typically call a use case to get connected devices
-    // For now, we'll just update the state without changing connected devices
-    if (state is BluetoothLoaded) {
-      final currentState = state as BluetoothLoaded;
-      // In a real implementation, you would fetch connected devices here
-      emit(currentState.copyWith(connectedDevices: []));
+    try {
+      final result = await getConnectedDevices(GetConnectedDevicesParams());
+      
+      result.fold(
+        (failure) {
+          if (state is BluetoothLoaded) {
+            final currentState = state as BluetoothLoaded;
+            emit(currentState.copyWith(
+              bluetoothStatus: 'Failed to get connected devices: ${failure.message}',
+            ));
+          }
+        },
+        (connectedDevices) {
+          if (state is BluetoothLoaded) {
+            final currentState = state as BluetoothLoaded;
+            emit(currentState.copyWith(connectedDevices: connectedDevices));
+          }
+        },
+      );
+    } catch (e) {
+      if (state is BluetoothLoaded) {
+        final currentState = state as BluetoothLoaded;
+        emit(currentState.copyWith(
+          bluetoothStatus: 'Error getting connected devices: $e',
+        ));
+      }
     }
   }
 

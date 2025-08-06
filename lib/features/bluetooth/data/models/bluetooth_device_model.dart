@@ -1,4 +1,4 @@
-import 'package:agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
 
 class BluetoothDeviceModel extends BluetoothDevice {
   const BluetoothDeviceModel({

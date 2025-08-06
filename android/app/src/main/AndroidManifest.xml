@@ -11,7 +11,7 @@
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
     
     <application
-        android:label="agri_connect"
+        android:label="app_agri_connect"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

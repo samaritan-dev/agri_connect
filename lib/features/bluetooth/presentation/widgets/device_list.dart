@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_state.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_state.dart';
 
 class DeviceList extends StatelessWidget {
   @override
@@ -25,7 +25,7 @@ class DeviceList extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Discovered Devices (${devices.length})',
+              'Discovered Farm Robots (${devices.length})',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -79,8 +79,8 @@ class DeviceList extends StatelessWidget {
                           SizedBox(height: 16),
                           Text(
                             isScanning 
-                                ? 'Searching for devices...'
-                                : 'No devices found. Tap "Start Scan" to begin.',
+                                ? 'Searching for farm robots...'
+                                : 'No farm robots found. Tap "Start Scan" to begin.',
                             style: TextStyle(
                               color: Colors.grey,
                               fontSize: 16,

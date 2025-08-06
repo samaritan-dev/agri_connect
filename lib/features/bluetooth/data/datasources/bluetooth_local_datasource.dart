@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
+import 'package:app_agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
 
 abstract class BluetoothLocalDataSource {
   Future<void> cacheDevices(List<BluetoothDeviceModel> devices);

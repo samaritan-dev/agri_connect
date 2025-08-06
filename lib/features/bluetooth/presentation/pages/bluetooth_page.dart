@@ -1,21 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_state.dart';
-import 'package:agri_connect/features/bluetooth/presentation/widgets/bluetooth_status_card.dart';
-import 'package:agri_connect/features/bluetooth/presentation/widgets/scan_controls.dart';
-import 'package:agri_connect/features/bluetooth/presentation/widgets/device_list.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_state.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/widgets/bluetooth_status_card.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/widgets/scan_controls.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/widgets/device_list.dart';
 
 class BluetoothPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agri Connect - BLE'),
+        title: const Text('Agri Connect - Farm Robot Scanner'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Text(
+              'ROBOT ONLY',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
       body: BlocProvider(
         create: (context) => context.read<BluetoothBloc>()..add(InitializeBluetooth()),

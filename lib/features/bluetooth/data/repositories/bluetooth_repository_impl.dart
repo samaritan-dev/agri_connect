@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:agri_connect/core/error/failures.dart';
-import 'package:agri_connect/core/usecases/either.dart';
-import 'package:agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
-import 'package:agri_connect/features/bluetooth/domain/repositories/bluetooth_repository.dart';
-import 'package:agri_connect/features/bluetooth/data/datasources/bluetooth_local_datasource.dart';
-import 'package:agri_connect/features/bluetooth/data/datasources/bluetooth_remote_datasource.dart';
-import 'package:agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
+import 'package:app_agri_connect/core/error/failures.dart';
+import 'package:app_agri_connect/core/usecases/either.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/entities/bluetooth_device.dart';
+import 'package:app_agri_connect/features/bluetooth/domain/repositories/bluetooth_repository.dart';
+import 'package:app_agri_connect/features/bluetooth/data/datasources/bluetooth_local_datasource.dart';
+import 'package:app_agri_connect/features/bluetooth/data/datasources/bluetooth_remote_datasource.dart';
+import 'package:app_agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
 
 class BluetoothRepositoryImpl implements BluetoothRepository {
   final BluetoothRemoteDataSource remoteDataSource;
@@ -91,6 +91,16 @@ class BluetoothRepositoryImpl implements BluetoothRepository {
       return Right(devices);
     } catch (e) {
       return Left(BluetoothFailure('Failed to get connected devices: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> getLocalDeviceName() async {
+    try {
+      final deviceName = await remoteDataSource.getLocalDeviceName();
+      return Right(deviceName);
+    } catch (e) {
+      return Left(BluetoothFailure('Failed to get local device name: $e'));
     }
   }
 } 

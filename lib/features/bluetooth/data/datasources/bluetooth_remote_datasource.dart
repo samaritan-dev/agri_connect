@@ -1,4 +1,4 @@
-import 'package:agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
+import 'package:app_agri_connect/features/bluetooth/data/models/bluetooth_device_model.dart';
 
 abstract class BluetoothRemoteDataSource {
   Future<bool> isBluetoothSupported();
@@ -7,4 +7,5 @@ abstract class BluetoothRemoteDataSource {
   Future<bool> connectToDevice(String deviceId);
   Future<bool> disconnectFromDevice(String deviceId);
   Future<List<BluetoothDeviceModel>> getConnectedDevices();
+  Future<String> getLocalDeviceName();
 } 

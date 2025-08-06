@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
-import 'package:agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
+import 'package:app_agri_connect/features/bluetooth/presentation/bloc/bluetooth_event.dart';
 
 class ScanControls extends StatelessWidget {
   final bool isScanning;
